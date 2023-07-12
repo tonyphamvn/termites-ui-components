@@ -1,0 +1,9 @@
+# exclude config
+.vscode
+
+# exclude package
+node_modules
+.npmrc
+
+# build
+dist
