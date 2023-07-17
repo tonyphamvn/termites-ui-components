@@ -1,11 +1,18 @@
 import React from "react";
-import styled from "styled-components";
 
-interface ButtonProps {
+export interface ButtonProps
+  extends Omit<
+    React.HTMLProps<HTMLButtonElement>,
+    "type" | "size" | "color" | "style" | "label"
+  > {
+  /**
+   * What type to use
+   */
+  type?: "button" | "reset" | "submit" | undefined;
   /**
    * Is this the principal call to action on the page?
    */
-  mode?: "primary" | "secondary";
+  color?: "primary" | "secondary";
   /**
    * What background color to use
    */
@@ -13,18 +20,14 @@ interface ButtonProps {
   /**
    * How large should the button be?
    */
-  size?: "small" | "medium" | "large";
+  size?: "small" | "medium" | "large" | string;
   /**
    * Button contents
    */
-  label: string;
-  /**
-   * Optional click handler
-   */
-  onClick?: () => void;
+  label?: string;
 }
 
-const Box = styled("button")({
+const buttonStyles = {
   fontFamily: `Nunito Sans, Helvetica Neue, Helvetica, Arial, sans-serif`,
   fontWeight: 700,
   border: 0,
@@ -32,10 +35,10 @@ const Box = styled("button")({
   cursor: "pointer",
   display: "inline-block",
   lineHeight: 1,
-});
+};
 
-const getModeStyles = (mode: string) => {
-  switch (mode) {
+const getColorStyles = (color: string) => {
+  switch (color) {
     case "primary":
       return {
         color: "white",
@@ -89,18 +92,22 @@ const getSizeStyles = (size: string) => {
  * Primary UI component for user interaction
  */
 export const Button = ({
-  mode = "primary",
+  color = "primary",
   size = "medium",
   style = {},
-  label,
+  label = "",
   ...props
 }: ButtonProps) => {
   return (
-    <Box
-      type="button"
-      style={{ ...getSizeStyles(size), ...getModeStyles(mode), ...style }}
+    <button
+      className="TermitesButton"
+      style={{
+        ...getSizeStyles(size),
+        ...getColorStyles(color),
+        ...buttonStyles,
+      }}
       {...props}>
       {label}
-    </Box>
+    </button>
   );
 };
