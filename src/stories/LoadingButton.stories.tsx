@@ -1,18 +1,18 @@
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/react";
 
-import { Button } from "../components";
+import { LoadingButton } from "../components";
 import { ThemeProvider, createTheme } from "../themes";
 
 // More on how to set up stories at: https://storybook.js.org/docs/react/writing-stories/introduction
 const meta = {
-  title: "Button",
-  component: Button,
+  title: "LoadingButton",
+  component: LoadingButton,
   tags: ["autodocs"],
-} satisfies Meta<typeof Button>;
+} satisfies Meta<typeof LoadingButton>;
 
 export default meta;
-type Story = StoryObj<typeof Button>;
+type Story = StoryObj<typeof LoadingButton>;
 
 //👇 The ListTemplate construct will be spread to the existing stories.
 const Template: Story = {
@@ -20,9 +20,44 @@ const Template: Story = {
     const theme = createTheme();
     return (
       <ThemeProvider theme={theme}>
-        <Button size="small" style={{ marginRight: "14px" }} {...args} />
-        <Button size="medium" style={{ marginRight: "14px" }} {...args} />
-        <Button size="large" {...args} />
+        <div>
+          <LoadingButton
+            loading={true}
+            size="small"
+            style={{ marginRight: "14px" }}
+            {...args}
+          />
+          <LoadingButton
+            loading={true}
+            size="medium"
+            style={{ marginRight: "14px" }}
+            {...args}
+          />
+          <LoadingButton loading={true} size="large" {...args} />
+        </div>
+
+        <div style={{ marginTop: "10px" }}>
+          <LoadingButton
+            loading={true}
+            loadingPosition="end"
+            size="small"
+            style={{ marginRight: "14px" }}
+            {...args}
+          />
+          <LoadingButton
+            loading={true}
+            loadingPosition="end"
+            size="medium"
+            style={{ marginRight: "14px" }}
+            {...args}
+          />
+          <LoadingButton
+            loadingPosition="end"
+            loading={true}
+            size="large"
+            {...args}
+          />
+        </div>
       </ThemeProvider>
     );
   },

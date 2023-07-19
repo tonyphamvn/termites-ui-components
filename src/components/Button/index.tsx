@@ -1,4 +1,5 @@
-import React from "react";
+import React, { CSSProperties, useContext } from "react";
+import { Theme, ThemeContext } from "../../themes";
 
 export interface ButtonProps
   extends Omit<
@@ -8,44 +9,138 @@ export interface ButtonProps
   /**
    * What type to use
    */
-  type?: "button" | "reset" | "submit" | undefined;
+  type?: ButtonTypes;
+
   /**
-   * Is this the principal call to action on the page?
+   * What variant to use
    */
-  color?: "primary" | "secondary";
+  variant?: ButtonVariantTypes;
+
   /**
    * What background color to use
    */
-  style?: object;
+  color?: ButtonColorTypes;
+
+  /**
+   * Custom style to use
+   */
+  style?: CSSProperties;
+
   /**
    * How large should the button be?
    */
-  size?: "small" | "medium" | "large" | string;
+  size?: ButtonSizeTypes;
+
   /**
    * Button contents
    */
   label?: string;
+
+  /**
+   * Start Icon Button
+   */
+  startIcon?: React.ReactElement;
+
+  /**
+   * End Icon Button
+   */
+  endIcon?: React.ReactElement;
 }
 
-const buttonStyles = {
-  fontFamily: `Nunito Sans, Helvetica Neue, Helvetica, Arial, sans-serif`,
-  fontWeight: 700,
-  border: 0,
-  borderRadius: "3em",
-  cursor: "pointer",
-  display: "inline-block",
-  lineHeight: 1,
-};
+export type ButtonColorTypes =
+  | "primary"
+  | "secondary"
+  | "error"
+  | "warning"
+  | "success"
+  | "info";
 
-const getColorStyles = (color: string) => {
+export type ButtonVariantTypes = "default" | "contained" | "outlined";
+
+export type ButtonTypes = "button" | "reset" | "submit";
+
+export type ButtonSizeTypes = "small" | "medium" | "large";
+
+const getColorStyles = (color: string, theme: Theme): CSSProperties => {
   switch (color) {
     case "primary":
       return {
         color: "white",
-        backgroundColor: "#1ea7fd",
+        backgroundColor: theme.palette?.primary.main,
       };
 
     case "secondary":
+      return {
+        color: "white",
+        backgroundColor: theme.palette?.secondary.main,
+      };
+
+    case "error":
+      return {
+        color: "white",
+        backgroundColor: theme.palette?.error.main,
+      };
+
+    case "warning":
+      return {
+        color: "white",
+        backgroundColor: theme.palette?.warning.main,
+      };
+
+    case "info":
+      return {
+        color: "white",
+        backgroundColor: theme.palette?.info.main,
+      };
+
+    case "success":
+      return {
+        color: "white",
+        backgroundColor: theme.palette?.success.main,
+      };
+
+    default:
+      return {
+        color: "white",
+        backgroundColor: theme.palette?.info.main,
+      };
+  }
+};
+
+const getSizeStyles = (size: string): CSSProperties => {
+  switch (size) {
+    case "small":
+      return {
+        fontSize: "12px",
+        padding: "6px 12px",
+      };
+
+    case "medium":
+      return {
+        fontSize: "14px",
+        padding: "8px 16px",
+      };
+
+    case "large":
+      return {
+        fontSize: "16px",
+        padding: "10px 22px",
+      };
+
+    default:
+      return {
+        fontSize: "12px",
+        padding: "8px 12px",
+      };
+  }
+};
+
+const getVariantStyles = (
+  theme: Theme,
+  variant?: "default" | "contained" | "outlined"
+): CSSProperties => {
+  switch (variant) {
+    case "default":
       return {
         color: "#333",
         backgroundColor: "transparent",
@@ -54,39 +149,49 @@ const getColorStyles = (color: string) => {
 
     default:
       return {
-        color: "white",
-        backgroundColor: "#1ea7fd",
+        color: "#333",
+        backgroundColor: "transparent",
+        boxShadow: "rgba(0, 0, 0, 0.15) 0px 0px 0px 1px inset",
       };
   }
 };
 
-const getSizeStyles = (size: string) => {
-  switch (size) {
-    case "small":
-      return {
-        fontSize: "12px",
-        padding: "10px 16px",
-      };
-
-    case "medium":
-      return {
-        fontSize: "14px",
-        padding: "11px 20px",
-      };
-
-    case "large":
-      return {
-        fontSize: "16px",
-        padding: "12px 24px",
-      };
-
-    default:
-      return {
-        fontSize: "12px",
-        padding: "10px 16px",
-      };
+const css = (theme: Theme, color?: ButtonColorTypes) => `
+  .TermitesButton {
+    font-family: "Nunito Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    border: 0;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    display: inline-flex;
+    line-height: 1;
+    align-items: center;
+    transition: background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, border-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
   }
-};
+  .TermitesButton:hover {  
+    background-color: ${
+      color && theme.palette ? theme.palette[color].hovered : "inherit"
+    }!important;
+  }
+  .TermitesButton:active {
+    background-color: ${
+      color && theme.palette
+        ? theme.mode === "light"
+          ? theme.palette[color].light
+          : theme.palette[color].dark
+        : "inherit"
+    }!important;
+  }
+  .TermitesButton-disabled {
+    background-color: rgba(19, 1, 1, 0.3)!important;
+    color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(195, 195, 195, 0.3);
+    cursor: auto;
+  }
+  .TermitesButton-disabled:hover {
+    background-color: rgba(19, 1, 1, 0.3)!important;
+  }
+`;
 
 /**
  * Primary UI component for user interaction
@@ -96,18 +201,42 @@ export const Button = ({
   size = "medium",
   style = {},
   label = "",
+  startIcon,
+  endIcon,
   ...props
 }: ButtonProps) => {
+  const theme = useContext(ThemeContext);
+
   return (
     <button
-      className="TermitesButton"
+      className={`TermitesButton${
+        props.disabled ? " TermitesButton-disabled" : ""
+      }`}
       style={{
         ...getSizeStyles(size),
-        ...getColorStyles(color),
-        ...buttonStyles,
+        ...getColorStyles(color, theme),
+        ...style,
       }}
       {...props}>
-      {label}
+      {startIcon && (
+        <div style={{ height: "24px", width: "24px" }}>{startIcon}</div>
+      )}
+      {label && (
+        <div
+          style={{
+            marginLeft: startIcon ? "8px" : 0,
+            marginRight: endIcon ? "8px" : 0,
+            height: "24px",
+            display: "inline-flex",
+            alignItems: "center",
+          }}>
+          {label}
+        </div>
+      )}
+      {endIcon && (
+        <div style={{ height: "24px", width: "24px" }}>{endIcon}</div>
+      )}
+      <style>{css(theme, color)}</style>
     </button>
   );
 };

@@ -16,11 +16,20 @@ export default [
         file: packageJson.main,
         format: "cjs",
         sourcemap: true,
+        globals: { react: "React" },
       },
       {
         file: packageJson.module,
         format: "esm",
         sourcemap: true,
+        globals: { react: "React" },
+      },
+      {
+        file: packageJson.browser,
+        format: "umd",
+        name: packageJson.name,
+        sourcemap: true,
+        globals: { react: "React" },
       },
     ],
     plugins: [
@@ -30,7 +39,7 @@ export default [
       typescript({ tsconfig: "./tsconfig.json" }),
       terser(),
       scss({
-        fileName: "index.min.css",
+        fileName: "types/themes/index.scss",
         outputStyle: "compressed",
       }),
     ],
@@ -39,6 +48,12 @@ export default [
   {
     input: "dist/esm/types/index.d.ts",
     output: [{ file: "dist/index.d.ts", format: "esm" }],
-    plugins: [dts.default()],
+    plugins: [
+      dts.default(),
+      scss({
+        fileName: "index.scss",
+        outputStyle: "compressed",
+      }),
+    ],
   },
 ];

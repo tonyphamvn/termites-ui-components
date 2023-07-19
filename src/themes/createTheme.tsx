@@ -1,3 +1,12 @@
+import {
+  error,
+  info,
+  primary,
+  secondary,
+  success,
+  warning,
+} from "../definitions/Color";
+
 export interface Palette {
   primary: PaletteColor;
   secondary: PaletteColor;
@@ -11,6 +20,7 @@ interface PaletteColor {
   light?: string;
   main: string;
   dark?: string;
+  hovered?: string;
   contrastText?: string;
 }
 
@@ -46,25 +56,61 @@ export interface BreakpointsOptions {
 
   values: { [key in Breakpoint]: number };
 
-  up: (key: Breakpoint | number) => string;
+  up?: (key: Breakpoint | number) => string;
 
-  down: (key: Breakpoint | number) => string;
+  down?: (key: Breakpoint | number) => string;
 
-  between: (start: Breakpoint | number, end: Breakpoint | number) => string;
+  between?: (start: Breakpoint | number, end: Breakpoint | number) => string;
 
-  only: (key: Breakpoint) => string;
+  only?: (key: Breakpoint) => string;
 
-  not: (key: Breakpoint) => string;
+  not?: (key: Breakpoint) => string;
 
   unit?: string | undefined;
 }
 
 const defaultThemeLight: ThemeOptions = {
   mode: "light",
+  palette: {
+    primary: primary,
+    secondary: secondary,
+    error: error,
+    warning: warning,
+    info: info,
+    success: success,
+  },
+  breakpoints: {
+    keys: ["xs", "sm", "md", "lg", "xl"],
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 900,
+      lg: 1200,
+      xl: 1536,
+    },
+  },
 };
 
 const defaultThemeDark: ThemeOptions = {
   mode: "dark",
+  palette: {
+    primary: primary,
+    secondary: secondary,
+    error: error,
+    warning: warning,
+    info: info,
+    success: success,
+  },
+  breakpoints: {
+    keys: ["xs", "sm", "md", "lg", "xl"],
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 900,
+      lg: 1200,
+      xl: 1536,
+    },
+  },
 };
 
 export const createTheme = (theme?: ThemeOptions) => {

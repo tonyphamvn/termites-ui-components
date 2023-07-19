@@ -320,3 +320,45 @@ export const blueGrey = {
   A400: "#78909c",
   A700: "#455a64",
 };
+
+export const primary = {
+  light: "#42a5f5",
+  main: "#1976d2",
+  dark: "#1565c0",
+  hovered: "#1e88e5",
+};
+
+export const secondary = {
+  light: "#ba68c8",
+  main: "#9c27b0",
+  dark: "#7b1fa2",
+  hovered: "#7b1fa2",
+};
+
+export const error = {
+  light: "#ef5350",
+  main: "#d32f2f",
+  dark: "#c62828",
+  hovered: "#c62828",
+};
+
+export const warning = {
+  light: "#ff9800",
+  main: "#ed6c02",
+  dark: "#e65100",
+  hovered: "#e65100",
+};
+
+export const info = {
+  light: "#03a9f4",
+  main: "#0288d1",
+  dark: "#01579b",
+  hovered: "#01579b",
+};
+
+export const success = {
+  light: "#4caf50",
+  main: "#2e7d32",
+  dark: "#1b5e20",
+  hovered: "#1b5e20",
+};
