@@ -16,7 +16,7 @@ export interface Palette {
   success: PaletteColor;
 }
 
-interface PaletteColor {
+export interface PaletteColor {
   light?: string;
   main: string;
   dark?: string;

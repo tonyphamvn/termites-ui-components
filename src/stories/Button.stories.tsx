@@ -20,9 +20,21 @@ const Template: Story = {
     const theme = createTheme();
     return (
       <ThemeProvider theme={theme}>
-        <Button size="small" style={{ marginRight: "14px" }} {...args} />
-        <Button size="medium" style={{ marginRight: "14px" }} {...args} />
-        <Button size="large" {...args} />
+        <Button
+          size="small"
+          style={{
+            ":hover": {
+              color: "#000",
+            },
+          }}
+          {...args}
+        />
+        <Button
+          size="medium"
+          variant="contained"
+          {...args}
+        />
+        <Button size="large" variant="outlined" {...args} />
       </ThemeProvider>
     );
   },

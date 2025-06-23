@@ -1,6 +1,39 @@
 import React, { CSSProperties, useContext } from "react";
-import { Theme, ThemeContext } from "../../themes";
+import { PaletteColor, Theme, ThemeContext } from "../../themes";
+import type * as CSS from "csstype";
 
+/**
+ * Map of all CSS pseudo selectors (`:hover`, `:focus`, ...).
+ */
+export type CSSPseudoSelectorProps<Theme extends object = {}> = {
+  [K in CSS.Pseudos]?:
+    | ((theme: Theme) => SystemStyleObject<Theme>)
+    | SystemStyleObject<Theme>;
+};
+
+export type StandardCSSProperties = CSS.PropertiesFallback<number | string>;
+
+export interface AllSystemCSSProperties extends StandardCSSProperties {}
+
+export type SystemCssProperties<Theme extends object = {}> = {
+  [K in keyof AllSystemCSSProperties]: SystemStyleObject<Theme>;
+};
+
+export type SystemStyleObject<Theme extends object = {}> =
+  | SystemCssProperties<Theme>
+  | CSSPseudoSelectorProps;
+
+/**
+ * The `SxProps` can be either object or function
+ */
+export type SxProps<Theme extends object = {}> =
+  | SystemStyleObject<Theme>
+  | ((theme: Theme) => SystemStyleObject<Theme>)
+  | ReadonlyArray<
+      | boolean
+      | SystemStyleObject<Theme>
+      | ((theme: Theme) => SystemStyleObject<Theme>)
+    >;
 export interface ButtonProps
   extends Omit<
     React.HTMLProps<HTMLButtonElement>,
@@ -24,7 +57,7 @@ export interface ButtonProps
   /**
    * Custom style to use
    */
-  style?: CSSProperties;
+  style?: SxProps;
 
   /**
    * How large should the button be?
@@ -61,49 +94,59 @@ export type ButtonTypes = "button" | "reset" | "submit";
 
 export type ButtonSizeTypes = "small" | "medium" | "large";
 
-const getColorStyles = (color: string, theme: Theme): CSSProperties => {
+const getVariantStyles = (
+  variant: ButtonVariantTypes,
+  color: ButtonColorTypes,
+  theme: Theme
+): CSSProperties => {
+  const currentColor = getColorStyles(color, theme);
+
+  if (variant === "contained") {
+    return {
+      color: "white",
+      backgroundColor: currentColor?.main,
+    };
+  }
+
+  if (variant === "outlined") {
+    return {
+      color: currentColor?.main,
+      backgroundColor: "transparent",
+      border: `1px solid ${currentColor?.main}`,
+    };
+  }
+
+  return {
+    backgroundColor: "transparent",
+    color: currentColor?.main,
+  };
+};
+
+const getColorStyles = (
+  color: ButtonColorTypes,
+  theme: Theme
+): PaletteColor | undefined => {
   switch (color) {
     case "primary":
-      return {
-        color: "white",
-        backgroundColor: theme.palette?.primary.main,
-      };
+      return theme.palette?.primary;
 
     case "secondary":
-      return {
-        color: "white",
-        backgroundColor: theme.palette?.secondary.main,
-      };
+      return theme.palette?.secondary;
 
     case "error":
-      return {
-        color: "white",
-        backgroundColor: theme.palette?.error.main,
-      };
+      return theme.palette?.error;
 
     case "warning":
-      return {
-        color: "white",
-        backgroundColor: theme.palette?.warning.main,
-      };
+      return theme.palette?.warning;
 
     case "info":
-      return {
-        color: "white",
-        backgroundColor: theme.palette?.info.main,
-      };
+      return theme.palette?.info;
 
     case "success":
-      return {
-        color: "white",
-        backgroundColor: theme.palette?.success.main,
-      };
+      return theme.palette?.success;
 
     default:
-      return {
-        color: "white",
-        backgroundColor: theme.palette?.info.main,
-      };
+      return theme.palette?.info;
   }
 };
 
@@ -135,28 +178,11 @@ const getSizeStyles = (size: string): CSSProperties => {
   }
 };
 
-const getVariantStyles = (
+const css = (
   theme: Theme,
-  variant?: "default" | "contained" | "outlined"
-): CSSProperties => {
-  switch (variant) {
-    case "default":
-      return {
-        color: "#333",
-        backgroundColor: "transparent",
-        boxShadow: "rgba(0, 0, 0, 0.15) 0px 0px 0px 1px inset",
-      };
-
-    default:
-      return {
-        color: "#333",
-        backgroundColor: "transparent",
-        boxShadow: "rgba(0, 0, 0, 0.15) 0px 0px 0px 1px inset",
-      };
-  }
-};
-
-const css = (theme: Theme, color?: ButtonColorTypes) => `
+  color: ButtonColorTypes,
+  variant: ButtonVariantTypes
+) => `
   .TermitesButton {
     font-family: "Nunito Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: 700;
@@ -170,16 +196,18 @@ const css = (theme: Theme, color?: ButtonColorTypes) => `
   }
   .TermitesButton:hover {  
     background-color: ${
-      color && theme.palette ? theme.palette[color].hovered : "inherit"
+      variant === "contained"
+        ? theme.palette![color].hovered
+        : "rgba(25, 118, 210, 0.04)"
     }!important;
   }
   .TermitesButton:active {
     background-color: ${
-      color && theme.palette
-        ? theme.mode === "light"
-          ? theme.palette[color].light
-          : theme.palette[color].dark
-        : "inherit"
+      variant === "default"
+        ? "rgba(25, 118, 210, 0.2)"
+        : theme.mode === "light"
+        ? theme.palette![color].light
+        : theme.palette![color].dark
     }!important;
   }
   .TermitesButton-disabled {
@@ -193,10 +221,23 @@ const css = (theme: Theme, color?: ButtonColorTypes) => `
   }
 `;
 
+const pseudos: { [P in CSS.SimplePseudos]?: CSS.Properties } = {
+  ":hover": {
+    color: "#000",
+  },
+};
+
+const styles: CSS.Properties = {
+  color: "red",
+  margin: "1em",
+  ...pseudos,
+};
+
 /**
  * Primary UI component for user interaction
  */
 export const Button = ({
+  variant = "default",
   color = "primary",
   size = "medium",
   style = {},
@@ -212,11 +253,12 @@ export const Button = ({
       className={`TermitesButton${
         props.disabled ? " TermitesButton-disabled" : ""
       }`}
-      style={{
-        ...getSizeStyles(size),
-        ...getColorStyles(color, theme),
-        ...style,
-      }}
+      // style={{
+      //   ...getSizeStyles(size),
+      //   ...getVariantStyles(variant, color, theme),
+      //   ...style,
+      // }}
+      style={styles}
       {...props}>
       {startIcon && (
         <div style={{ height: "24px", width: "24px" }}>{startIcon}</div>
@@ -236,7 +278,7 @@ export const Button = ({
       {endIcon && (
         <div style={{ height: "24px", width: "24px" }}>{endIcon}</div>
       )}
-      <style>{css(theme, color)}</style>
+      <style>{css(theme, color, variant)}</style>
     </button>
   );
 };
